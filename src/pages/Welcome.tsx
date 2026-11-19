@@ -14,6 +14,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { get, post } from '../lib/api';
+import { API_BASE } from '../lib/api';
 import { useTheme } from '../lib/theme';
 import type { Session } from '../lib/types';
 import { Logo } from '../components/Logo';
@@ -175,7 +176,7 @@ export function WelcomePage() {
 
             <div className="mt-6 space-y-3">
               <a
-                href={oauthReady ? '/api/auth/x/start' : undefined}
+                href={oauthReady ? `${API_BASE}/api/auth/x/start` : undefined}
                 aria-disabled={!oauthReady}
                 onClick={(event) => {
                   if (!oauthReady) {

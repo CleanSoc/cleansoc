@@ -21,6 +21,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { api, get, post } from '../lib/api';
+import { API_BASE } from '../lib/api';
 import { useTheme } from '../lib/theme';
 import { cn, initials, relativeTime } from '../lib/format';
 import type { Account, Session } from '../lib/types';
@@ -178,7 +179,7 @@ export function AppShell({ session, children }: { session: Session; children: Re
                       </div>
                       <div className="border-t border-line p-1.5">
                         <a
-                          href="/api/auth/x/start"
+                          href={API_BASE ? `${API_BASE}/api/auth/x/start` : '/api/auth/x/start'}
                           className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-[12.5px] text-ink-soft transition-colors hover:bg-raised"
                         >
                           <Plus className="size-4 text-muted" /> Connect another X account

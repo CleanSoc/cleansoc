@@ -18,6 +18,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { api, get, post } from '../lib/api';
+import { API_BASE } from '../lib/api';
 import { useTheme } from '../lib/theme';
 import { cn, formatDateTime, relativeTime } from '../lib/format';
 import { Badge, Button, Callout, Checkbox, Field, Input, Modal, useToast } from '../components/ui';
@@ -205,7 +206,7 @@ export function SettingsPage() {
                     Export cached data (JSON)
                   </Button>
                 </a>
-                <a href="/api/auth/x/start">
+                <a href={API_BASE ? `${API_BASE}/api/auth/x/start` : '/api/auth/x/start'}>
                   <Button variant="ghost" size="sm">
                     Connect another account
                   </Button>
