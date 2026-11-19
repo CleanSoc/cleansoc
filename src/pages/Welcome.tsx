@@ -9,6 +9,8 @@ import {
   Layers,
   Lock,
   ShieldCheck,
+  Moon,
+  Sun,
   Sparkles,
   Trash2,
   TriangleAlert,
@@ -18,7 +20,10 @@ import { API_BASE } from '../lib/api';
 import { useTheme } from '../lib/theme';
 import type { Session } from '../lib/types';
 import { Logo } from '../components/Logo';
-import { Badge, Button, Callout, Spinner } from '../components/ui';
+import { Badge, Button as LegacyButton, Callout, Spinner } from '../components/ui';
+import { Button } from '../components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { Input, Textarea, Label } from '../components/ui/input';
 import { useSessionQuery } from '../components/AppShell';
 
 interface Capabilities {
@@ -50,7 +55,6 @@ export function WelcomePage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const queryClient = useQueryClient();
-  const { resolved, toggle } = useTheme();
   const { data: session } = useSessionQuery();
   const [error, setError] = useState<string | null>(params.get('error'));
   const [booting, setBooting] = useState(false);
@@ -85,7 +89,7 @@ export function WelcomePage() {
   const demoReady = capabilities?.demoMode ?? false;
 
   return (
-    <div className="relative min-h-full overflow-x-clip bg-canvas">
+    <div className="relative min-h-full overflow-hidden bg-canvas">
       <div className="pointer-events-none absolute inset-0 grid-paper opacity-60" aria-hidden />
       <div
         className="pointer-events-none absolute -right-40 -top-40 size-[520px] rounded-full bg-accent/10 blur-3xl dark:bg-accent/15"
@@ -95,21 +99,6 @@ export function WelcomePage() {
         className="pointer-events-none absolute -bottom-56 -left-32 size-[480px] rounded-full bg-acid/20 blur-3xl dark:bg-acid/10"
         aria-hidden
       />
-
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-        <Logo markClassName="size-8" />
-        <div className="flex items-center gap-2">
-          <Badge tone="outline" className="hidden sm:inline-flex">
-            OAuth 2.0 · no passwords
-          </Badge>
-          <button
-            onClick={toggle}
-            className="rounded-lg border border-line bg-surface/70 px-2.5 py-1.5 text-[11.5px] font-medium text-muted transition-colors hover:text-ink"
-          >
-            {resolved === 'dark' ? 'Light' : 'Dark'} mode
-          </button>
-        </div>
-      </header>
 
       <main className="relative z-10 mx-auto grid w-full max-w-6xl items-start gap-12 px-5 pb-16 pt-6 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 lg:pt-14">
         <section className="animate-fade-up">
@@ -210,7 +199,7 @@ export function WelcomePage() {
                 <span className="h-px flex-1 bg-line" />
               </div>
 
-              <Button
+              <LegacyButton
                 variant="secondary"
                 size="lg"
                 className="w-full"
@@ -219,7 +208,7 @@ export function WelcomePage() {
                 disabled={!demoReady && !isLoading}
               >
                 {demo.isPending || booting ? 'Building demo workspace…' : 'Explore the demo workspace'}
-              </Button>
+              </LegacyButton>
               <p className="text-center text-[11px] leading-4 text-muted">
                 {demoReady
                   ? 'A seeded account with ~260 posts, replies and reposts. Deletions are simulated.'
@@ -248,7 +237,78 @@ export function WelcomePage() {
             <Link to="/privacy" className="font-medium text-accent hover:underline">Privacy</Link>
           </p>
         </section>
+
+        <section className="mx-auto mt-16 max-w-5xl space-y-12">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { to: '/features', t: 'Features', d: 'Categories, filters, bulk select, worker, rules, history, archive import, export.' },
+              { to: '/how-it-works', t: 'How it works', d: 'Connect, sync, review, delete — four steps to a cleaner timeline.' },
+              { to: '/use-cases', t: 'Use cases', d: 'When and why you would reach for CleanSoc.' },
+              { to: '/faq', t: 'FAQ', d: 'Answers about confirmation, restoration, passwords, limits, cost.' },
+              { to: '/contact', t: 'Contact', d: 'Questions, feedback, or support requests.' },
+              { to: '/terms', t: 'Terms & Privacy', d: 'How we handle your data and the rules of use.' },
+            ].map((c) => (
+              <Link key={c.to} to={c.to} className="card group p-5 transition-colors hover:border-line-strong">
+                <div className="text-[14px] font-semibold text-ink group-hover:text-accent">{c.t}</div>
+                <p className="mt-1 text-[12.5px] leading-5 text-muted">{c.d}</p>
+                <div className="mt-3 text-[12px] font-medium text-accent">Learn more →</div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="card p-6">
+            <h2 className="text-[18px] font-semibold text-ink">What CleanSoc does</h2>
+            <p className="mt-2 max-w-2xl text-[13.5px] leading-6 text-ink-soft">
+              CleanSoc connects to your X account through OAuth, caches your posts, replies, reposts, and media, and gives
+              you a fast, filterable workspace to review and bulk-delete content you no longer want online. Nothing is
+              deleted automatically — every removal requires your explicit confirmation.
+            </p>
+            <div className="mt-4">
+              <Button asChild>
+                <Link to="/how-it-works">See how it works</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
       </main>
+
+      <footer className="border-t border-line bg-surface/40 py-10">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+          <div>
+            <Logo />
+            <p className="mt-3 max-w-xs text-[12.5px] leading-5 text-muted">
+              A calmer way to review and clean up your X account. OAuth-only, encrypted tokens, explicit confirmation.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Product</h3>
+            <ul className="mt-3 space-y-2 text-[13px]">
+              <li><Link to="/features" className="text-ink-soft hover:text-ink">Features</Link></li>
+              <li><Link to="/how-it-works" className="text-ink-soft hover:text-ink">How it works</Link></li>
+              <li><Link to="/use-cases" className="text-ink-soft hover:text-ink">Use cases</Link></li>
+              <li><Link to="/faq" className="text-ink-soft hover:text-ink">FAQ</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Company</h3>
+            <ul className="mt-3 space-y-2 text-[13px]">
+              <li><Link to="/contact" className="text-ink-soft hover:text-ink">Contact</Link></li>
+              <li><Link to="/terms" className="text-ink-soft hover:text-ink">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="text-ink-soft hover:text-ink">Privacy Policy</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Connect</h3>
+            <ul className="mt-3 space-y-2 text-[13px]">
+              <li><a href={API_BASE ? `${API_BASE}/api/auth/x/start` : '/api/auth/x/start'} className="text-ink-soft hover:text-ink">Sign in with X</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="mx-auto mt-8 max-w-6xl border-t border-line px-4 pt-6 text-center text-[11px] text-muted sm:px-6">
+          &copy; {new Date().getFullYear()} CleanSoc. All rights reserved.
+        </div>
+      </footer>
 
       {booting && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-canvas/70 backdrop-blur-sm">
@@ -262,6 +322,58 @@ export function WelcomePage() {
         </div>
       )}
     </div>
+  );
+}
+
+function ContactForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validate = () => {
+    const next: typeof errors = {};
+    if (!name.trim()) next.name = 'Name is required.';
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) next.email = 'Enter a valid email.';
+    if (message.trim().length < 10) next.message = 'Message must be at least 10 characters.';
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="mt-4 rounded-xl border border-line bg-surface p-4 text-[13px] text-ink-soft">
+        Thanks, {name}. Your message has been noted. We'll get back to you at {email}.
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="mt-4 max-w-lg space-y-3" noValidate>
+      <div>
+        <Label htmlFor="contact-name">Name</Label>
+        <Input id="contact-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
+        {errors.name && <p className="mt-1 text-[11.5px] text-danger">{errors.name}</p>}
+      </div>
+      <div>
+        <Label htmlFor="contact-email">Email</Label>
+        <Input id="contact-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+        {errors.email && <p className="mt-1 text-[11.5px] text-danger">{errors.email}</p>}
+      </div>
+      <div>
+        <Label htmlFor="contact-message">Message</Label>
+        <Textarea id="contact-message" value={message} onChange={(e) => setMessage(e.target.value)} className="mt-1" />
+        {errors.message && <p className="mt-1 text-[11.5px] text-danger">{errors.message}</p>}
+      </div>
+      <Button type="submit">Send message</Button>
+    </form>
   );
 }
 

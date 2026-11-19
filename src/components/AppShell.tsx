@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -48,11 +48,76 @@ export function useSessionQuery() {
 }
 
 export function AppShell({ session, children }: { session: Session; children: React.ReactNode }) {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const pendingG = useRef(false);
+  const pendingTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const isTyping = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+    };
+
+    const handler = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (isTyping(event.target)) return;
+
+      if (event.key === 'Escape') {
+        setShortcutsOpen(false);
+        return;
+      }
+      if (event.key === '?') {
+        event.preventDefault();
+        setShortcutsOpen((v) => !v);
+        return;
+      }
+      if (event.key === '/') {
+        const search = document.querySelector<HTMLInputElement>('input[type="search"], input[aria-label*="Search" i]');
+        if (search) {
+          event.preventDefault();
+          search.focus();
+        }
+        return;
+      }
+      if (event.key.toLowerCase() === 'g') {
+        pendingG.current = true;
+        if (pendingTimer.current) window.clearTimeout(pendingTimer.current);
+        pendingTimer.current = window.setTimeout(() => {
+          pendingG.current = false;
+        }, 900);
+        return;
+      }
+      if (pendingG.current) {
+        pendingG.current = false;
+        if (pendingTimer.current) window.clearTimeout(pendingTimer.current);
+        const key = event.key.toLowerCase();
+        const routes: Record<string, string> = {
+          d: '/app',
+          a: '/app/activity',
+          c: '/app/cleanup',
+          r: '/app/rules',
+          h: '/app/history',
+        };
+        if (routes[key]) {
+          event.preventDefault();
+          navigate(routes[key]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      if (pendingTimer.current) window.clearTimeout(pendingTimer.current);
+    };
+  }, [navigate]);
   const location = window.location.pathname;
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { notify } = useToast();
   const activeAccount = session.accounts?.find((account) => account.id === session.activeAccountId) ?? session.accounts?.[0];
 
@@ -200,6 +265,36 @@ export function AppShell({ session, children }: { session: Session; children: Re
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] px-4 pb-28 pt-6 sm:px-6 lg:px-8">{children}</main>
+
+        {shortcutsOpen && (
+          <div className="fixed inset-0 z-[60] flex items-start justify-center bg-ink/30 px-4 pt-[12vh] backdrop-blur-sm" onClick={() => setShortcutsOpen(false)}>
+            <div className="w-full max-w-md animate-scale-in rounded-2xl border border-line bg-surface p-5 shadow-float" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-[15px] font-semibold text-ink">Keyboard shortcuts</h2>
+                <button onClick={() => setShortcutsOpen(false)} className="rounded-lg p-1.5 text-muted hover:bg-raised hover:text-ink" aria-label="Close">
+                  <X className="size-4" />
+                </button>
+              </div>
+              <dl className="space-y-2 text-[12.5px]">
+                {[
+                  ['?', 'Toggle this help'],
+                  ['/', 'Focus search'],
+                  ['g then d', 'Dashboard'],
+                  ['g then a', 'Activity'],
+                  ['g then c', 'Cleanup'],
+                  ['g then r', 'Saved rules'],
+                  ['g then h', 'History'],
+                  ['Esc', 'Close dialogs/menus'],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between gap-4">
+                    <dt className="font-mono text-[11.5px] text-ink">{key}</dt>
+                    <dd className="text-muted">{desc}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

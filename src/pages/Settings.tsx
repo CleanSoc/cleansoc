@@ -21,7 +21,7 @@ import { api, get, post } from '../lib/api';
 import { API_BASE } from '../lib/api';
 import { useTheme } from '../lib/theme';
 import { cn, formatDateTime, relativeTime } from '../lib/format';
-import { Badge, Button, Callout, Checkbox, Field, Input, Modal, useToast } from '../components/ui';
+import { Badge, Button, Callout, Checkbox, Field, Input, Modal, Skeleton, useToast } from '../components/ui';
 import { PageHeader } from '../components/PageHeader';
 import { AccountAvatar, useSessionQuery } from '../components/AppShell';
 
@@ -127,6 +127,18 @@ export function SettingsPage() {
     setConfirmText('');
     setAcknowledged(false);
   };
+
+  if (settings.isLoading) {
+    return (
+      <div className="animate-fade-up">
+        <Skeleton className="mb-6 h-10 w-48" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">

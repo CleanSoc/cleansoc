@@ -1,7 +1,8 @@
-import clsx, { type ClassValue } from 'clsx';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]): string {
-  return clsx(inputs);
+  return twMerge(clsx(inputs));
 }
 
 export function formatNumber(value: number | null | undefined): string {
@@ -123,12 +124,12 @@ export function downloadJson(filename: string, data: unknown): void {
 }
 
 export const mediaGradients = [
-  'linear-gradient(135deg,#0f5f4c 0%,#6fbf9c 100%)',
-  'linear-gradient(135deg,#2b3a55 0%,#9aa9c9 100%)',
-  'linear-gradient(135deg,#7a3b2e 0%,#e0a37a 100%)',
-  'linear-gradient(135deg,#3a4a2f 0%,#b6cf8a 100%)',
-  'linear-gradient(135deg,#4b3050 0%,#c39ac6 100%)',
-  'linear-gradient(135deg,#5c4a12 0%,#dbc06a 100%)',
-  'linear-gradient(135deg,#173a4a 0%,#79b6c9 100%)',
-  'linear-gradient(135deg,#4a1f2b 0%,#d98d9e 100%)',
+  'linear-gradient(135deg, #0f5f4c -20%, #6fbf9c 120%)',
+  'linear-gradient(135deg, #2b3a55 -20%, #9aa9c9 120%)',
+  'linear-gradient(135deg, #7a3b2e -20%, #e0a37a 120%)',
+  'linear-gradient(135deg, #3a4a2f -20%, #b6cf8a 120%)',
+  'linear-gradient(135deg, #4b3050 -20%, #c39ac6 120%)',
+  'linear-gradient(135deg, #5c4a12 -20%, #dbc06a 120%)',
+  'linear-gradient(135deg, #173a4a -20%, #79b6c9 120%)',
+  'linear-gradient(135deg, #4a1f2b -20%, #d98d9e 120%)',
 ];

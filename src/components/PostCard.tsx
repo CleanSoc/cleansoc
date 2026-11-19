@@ -185,8 +185,9 @@ function MediaGrid({ post }: { post: Post }) {
             target="_blank"
             rel="noreferrer noopener"
             className={cn(
-              'relative block overflow-hidden rounded-lg border border-line',
+              'relative block overflow-hidden rounded-lg',
               media.length === 1 ? 'aspect-video' : 'aspect-square',
+              src ? 'border border-line' : '',
               !src && 'pointer-events-none',
             )}
             style={!src ? { background: mediaGradients[item.gradient ?? index % mediaGradients.length] } : undefined}
